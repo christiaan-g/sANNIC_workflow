@@ -28,7 +28,7 @@ nonnative_records<-
   read_csv2("Output/Western Cape urban non-native records 1 February 2025.csv")
 
 
-## Adding shapefiles ###########################################################
+## Preparing data ###########################################################
 
 # Joining non-native plant records with urban centre shapefiles
 WC_records_points<-
@@ -59,7 +59,7 @@ total_alien_matrix_coarse<-
   group_by(taxon)%>%
   summarise(num_obs = length(taxon))%>%
   column_to_rownames(var = "taxon")%>%
-  as.matrix()#%>%view()
+  as.matrix()
 
 # Converting main dataset into a site-by-species matrix, data coarsening applied
 site_by_species_coarse<-
@@ -75,7 +75,7 @@ site_by_species_coarse<-
   select(where(~ !all(is.na(.))))%>%
   column_to_rownames(var = "taxon")%>%
   mutate(across(everything(), ~ replace_na(., 0)))%>%
-  as.matrix()%>%t()#%>%view()
+  as.matrix()%>%t()
 
 # Transposing site-by-species into species-by-site
 species_by_site_coarse<-
@@ -107,7 +107,6 @@ completeness_coarse<-
     conf = 0.95,
     nT = NULL
   )
-View(completeness_coarse)
 
 # Removing sites with falling profile and isolating q = 1
 urban_completeness<-
@@ -115,12 +114,10 @@ urban_completeness<-
   group_by(Assemblage)%>%
   filter(all(diff(Estimate.SC)>0))%>%
   filter(Order.q == 1)%>%
-  select(Assemblage,Estimate.SC
-         #,SC.LCL,SC.UCL
+  select(Assemblage,Estimate.SC,SC.LCL,SC.UCL
          )%>%
   rename(Site = Assemblage)
 
-view(urban_completeness)
 
 # Produces summary table of each urban centre,including urban area (m^2), 
 #   the number of observations, number of species, 
@@ -146,13 +143,13 @@ a<-
   site_by_species_coarse%>%
   as.data.frame()%>%
   rownames_to_column("Site")%>%
-  left_join(urban_completeness)%>%
+  left_join(select(urban_completeness,Site,Estimate.SC))%>%
   pivot_longer(names_to = "Species",cols = -Site)%>%
   group_by(Site)%>%
   dplyr::mutate(rank = ifelse(Species == "Estimate.SC",value,rank(-value)))%>%
   dplyr::mutate(rank = ifelse(value == 0 & Species != "Estimate.SC",Inf,rank))%>%
   select(-value)%>%
-  pivot_wider(names_from = Site,values_from = rank)#%>%view()
+  pivot_wider(names_from = Site,values_from = rank)
 
 # Produces a site-by-spcies presence-absence data frame
 b<-site_by_species_coarse%>%
@@ -164,10 +161,6 @@ b<-site_by_species_coarse%>%
   select(-value)%>%
   pivot_wider(names_from = Site,values_from = pres)
 
-# Produces a species-by-site dataframe
-c<-species_by_site_coarse%>%
-  as.data.frame()%>%
-  rownames_to_column("Species")
 
 # Calculates Prevalence Indices of all species (see Gildenhuys et al. (unpubl.) for details) 
 d1<-
@@ -180,32 +173,31 @@ d1<-
   filter(Species != "Estimate.SC")%>%
   rowwise()%>%
   mutate(PI = sum(c_across(-Species)))%>%
-  select(Species,PI)#%>%view()
-view(d1)
+  select(Species,PI)
 
 # Calculates number of urban centres where each species is found
 d2<-
   b%>%
   rowwise()%>%
-  dplyr::mutate(num_areas = sum((c_across(-Species))))%>%
+  mutate(num_areas = sum((c_across(-Species))))%>%
   select(Species, num_areas)
 
 # Calculates the total number of observations of each species
 d3<-
-  c%>%
-  rowwise()%>%
-  dplyr::mutate(total_obs = sum((c_across(-Species))))%>%
-  select(Species, total_obs)
+  nonnative_inventory%>%
+  select(taxon,num_obs)%>%
+  rename(Species = taxon,
+         total_obs = num_obs)%>%view()
 
 # Combines all the previous calculations into a species summary table
 e<-full_join(d1,d2)%>%
   full_join(d3)%>%
-  dplyr::arrange(desc(PI))#%>%view()
+  dplyr::arrange(desc(PI))
 
-write.csv2(e,"Species rank.csv")
+view(e)
 
 
-## Completeness profiles visual ################################################
+## Completeness profile visuals ################################################
 
 # Produces Appendix C
 AppendixC<-
@@ -227,11 +219,11 @@ AppendixC<-
   ylab("Estimate SC")+
   xlab("Order q")+
   geom_text(aes(label = label),size = 2,y = 0.1)
-AppendixC
 
 tiff('Output/AppendixC.tiff', units="cm", width=25, height=16, res=400)
 AppendixC
 dev.off()
+
 
 # Produces figure 4
 figure4<-
@@ -255,7 +247,6 @@ completeness_coarse%>%
         text = element_text(size=12, colour = "black"))+
   ylab("Estimate SC")+
   xlab("Order q")
-figure4
 
 tiff('Output/figure4.tiff', units="cm", width=13, height=10, res=300)
 figure4

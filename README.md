@@ -12,7 +12,9 @@ Export records for any vascular plant group of interest in any location of inter
 
 Columns required for this workflow are:
 
--   id observed_on
+-   id 
+
+-   observed_on
 
 -   quality_grade
 
@@ -42,7 +44,7 @@ Inputs an iNaturalist csv (comma separated value) export with at least the colum
 
 #### 2a) Apply problematic taxa (optional)
 
-Allows for taxa that are difficult to identify to be collapsed to a higher (or lower) taxonomic rank. Requires a list of problematic taxa as an input, including the taxonomic name they will be collapsed to (as it appears in iNaturalist) and the rank of that taxon (e.g. name: Avena; rank: genus). It also allows for the flexible manual specification of taxa to be collapsed based in their taxon_id specified in iNaturalist (this can be useful for subgeneric groups or other non-standard groupings not accounted for in iNaturalist).
+Allows for taxa that are difficult to identify to be collapsed to a higher taxonomic rank. Requires a list of problematic taxa as an input, including the taxonomic name they will be collapsed to (as it appears in iNaturalist) and the rank of that taxon (e.g. name: Avena; rank: genus). It also allows for the flexible manual specification of taxa to be collapsed based in their taxon_id specified in iNaturalist (this can be useful for subgeneric groups or other non-standard groupings not accounted for in iNaturalist).
 
 #### 2b) Standardise names
 
@@ -72,6 +74,6 @@ Creating the project is just the first part of step 3. The crucial part is to th
 
 ### Step 4: Conduct completeness assessment
 
-Conduct a completeness assessment of the data to assess how well sampled the taxa of interest are in the region of interest. This is all about understanding how comprehensive the dataset is. iNaturalist data is opportunistic so sampling intensity is not even across spatial scales. The concept of a sample completeness profile helps us estimate what proportion of the total non-native plant diversity we actually managed to observe. It takes into account not just the overall number of species but also how common or rare they are in our dataset. We used the *Completeness* function in the iNEXT.4steps package to calculate the completeness profile in our case study. Uncertainty is obtained using bootstrapping.
+Conduct a completeness assessment of the data to assess how well sampled the taxa of interest are in the region of interest. This is all about understanding how comprehensive the dataset is. iNaturalist data is opportunistic so sampling intensity is not even across the spatial scales. The concept of a sample completeness profile helps us estimate what proportion of the total non-native plant diversity we actually managed to observe. It takes into account not just the overall number of species but also how common or rare they are in our dataset. We used the *Completeness* function in the iNEXT.4steps to calculate the completeness profile in our case study. Uncertainty is obtained using bootstrapping.
 
-In our urban Western Cape case study we calculated the profile for the dataset in its entirety and for each urban centre separately. We then calculated a Prevalence Index of all species in our dataset. All code we used for this analysis can be found at "Output/Step4 Completeness assessment.R".
+In our urban Western Cape case study we calculated the profile for the dataset in its entirety and for each urban centre separately. Additionally, for each species we calculated a Prevalence Index based on the number of urban centres where each species was found and the abundance ranking of those species within each urban centre, weighted by the Sample Coverage calculated for that urban centre. All code we used for this analysis can be found at "Output/Step4 Completeness assessment.R".
