@@ -3,6 +3,7 @@
 This repository includes the code and data related to the execution of the semi-Automated Non-Native Inventory Compilation (sANNIC) workflow. This workflow is specifically designed to facilitate the compilation of non-native vascular plant inventories from iNaturalist data. It follows four steps: 1) acquire data from iNaturalist, a community science platform which allows users to contribute records of organisms, 2) compile a non-native inventory referencing the World Checklist of Vascular Plants (WCVP), 3) create and curate an iNaturalist project of the non-native species inventory, and 4) conduct a completeness assessment of the inventory generated.
 
 ## Visual
+![Updated workflow 2025](https://github.com/user-attachments/assets/67471b4a-2916-4e58-b870-045ed3c3003b)
 
 ## Instructions
 
