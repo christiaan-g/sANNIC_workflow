@@ -1,6 +1,6 @@
 # sANNIC workflow
 
-This repository includes the code and data related to the execution of the semi-Automated Non-Native Inventory Compilation (sANNIC) workflow. This workflow is specifically designed to facilitate the compilation of non-native vascular plant inventories from iNaturalist data. It follows four steps: 1) acquire data from iNaturalist, a community science platform which allows users to contribute records of organisms, 2) compile a non-native inventory referencing the World Checklist of Vascular Plants (WCVP), 3) create and curate an iNaturalist project of the non-native species inventory, and 4) conduct a completeness assessment of the inventory generated.
+This repository includes the code and data related to the execution of the semi-Automated Non-Native Inventory Compilation (sANNIC) workflow. This workflow is designed to facilitate the compilation of non-native vascular plant inventories from iNaturalist data. It follows four steps: 1) acquire data from iNaturalist, a community science platform which allows users to contribute records of organisms, 2) compile a non-native inventory referencing the World Checklist of Vascular Plants (WCVP), 3) create and curate an iNaturalist project of the non-native species inventory, and 4) conduct a completeness assessment of the inventory generated.
 
 This workflow was demonstrated using the non-native plants of Western Cape urban areas case study, South Africa https://www.inaturalist.org/projects/non-native-plants-of-western-cape-urban-areas.
 
@@ -11,7 +11,7 @@ This workflow was demonstrated using the non-native plants of Western Cape urban
 
 ### Step 1: Acquire data
 
-Export records for any vascular plant group of interest in any location of interest from iNaturalist.
+Export records for any vascular plant group of interest in any region of interest from iNaturalist. The taxonomic group of interest and region of interest can be specified in the iNaturalist search filters. For region of interest, either an existing 'place' or a manually specified 'place' can be used https://www.inaturalist.org/places.
 
 Columns required for this workflow are:
 
@@ -55,7 +55,7 @@ This section standardises the taxonomic names of the vascular plants using the W
 
 #### 2c) Obtain native ranges
 
-Native ranges of all taxa are acquired from the matched names in the WCVP. Taxa that have their native ranges entirely outside the region of interest or are considered introduced in the region of interest will be flagged as "nonnative" and taxa with native ranges within the region of interest will be flagged as "native".
+Native ranges of all taxa are acquired from the matched names in the WCVP. Taxa that have their native ranges entirely outside the region of interest or are considered introduced in the region of interest will be flagged as "nonnative", and taxa with native ranges within the region of interest will be flagged as "native".
 
 #### 2d) Manual checking (optional)
 
@@ -71,15 +71,15 @@ Will output two spreadsheets (csv2 by default). A list of non-native species and
 
 ### Step 3: Curate iNaturalist project
 
-The next step is bringing the compiled list back into iNaturalist. Create an iNaturalist project with the region of interest. Through the project settings, manually add all the species from the non-native list. This creates a focussed collection of all the potential non-native plants in the region of interest. If there are too many species they can be added at the genus level (if all species in the genus are non-native to the region of interest) or can be added to multiple parallel projects (for example grouped alphabetically by family).
+The next step is bringing the compiled list back into iNaturalist. Create an iNaturalist project. Through the project settings, manually add all the species from the non-native list and specify the place(s) of interest. This creates a focussed collection of all the potential non-native plants in the region of interest. If there are too many species they can be added at the genus level (if all species in the genus are non-native to the region of interest) or can be added to multiple parallel projects (for example grouped alphabetically by family).
 
-Creating the project is just the first part of step 3. The crucial part is to then go through all of the observations within that project and check their accuracy. This involves verifying identifications, identifying records as accurately as possible, and making sure species are correctly flagged as cultivated if needed. This step allows for the improvement of data quality and better understanding of the non-native flora in the region of interest. The intensity of curation required depends on the taxon and region of interest. Refer to Richardson and Potgieter (2024) for details.
+Creating the project is just the first part of step 3. The crucial part is to then go through all observations within that project to check their accuracy. This involves verifying identifications, identifying records as accurately as possible, and making sure species are correctly flagged as cultivated if needed. This step allows for the improvement of data quality and better understanding of the non-native flora in the region of interest. The level of curation required depends on the taxon and region of interest. Refer to Richardson and Potgieter (2024) for details.
 
 ### Step 4: Conduct completeness assessment
 
-Conduct a completeness assessment of the data to assess how well sampled the taxa of interest are within the region of interest. This is all about understanding how comprehensive the dataset is. iNaturalist data is opportunistic so sampling intensity is not even across the spatial scales. The concept of a sample completeness profile helps us estimate what proportion of the total non-native plant diversity we actually managed to observe. It takes into account not just the overall number of species but also how common or rare they are in our dataset. We used the *Completeness* function in the iNEXT.4steps package to calculate the completeness profile in our case study. Uncertainty is obtained using bootstrapping. Refer to Chao et al. (2020) for more information.
+Conduct a completeness assessment of the data to assess how well the taxa of interest are sampled within the region of interest. This is all about understanding how comprehensive the dataset is. iNaturalist data is opportunistic so sampling intensity is not even across the spatial scales. The concept of a sample completeness profile helps us estimate what proportion of the total non-native plant diversity we actually managed to observe. It takes into account not just the overall number of species but also how common or rare they are in our dataset. We used the *Completeness* function in the iNEXT.4steps package to calculate the completeness profile in our case study. Uncertainty is obtained using bootstrapping. Refer to Chao et al. (2020) for more information.
 
-In our urban Western Cape case study we calculated the profile for the dataset in its entirety and for each urban centre separately. Additionally, for each species we calculated a Prevalence Index based on the number of urban centres where each species was found and the abundance ranking of those species within each urban centre, weighted by the Sample Coverage calculated for that urban centre. All code we used for this analysis can be found at "Output/Step4 Completeness assessment.R".
+In our urban Western Cape case study we calculated the profile for the dataset in its entirety and for each urban centre separately. For each species we also calculated a Prevalence Index based on the number of urban centres where each species was found and the abundance ranking of those species within each urban centre, weighted by the Sample Coverage calculated for that urban centre. All code we used for this analysis can be found at "Output/Step4 Completeness assessment.R".
 
 ## References
 
