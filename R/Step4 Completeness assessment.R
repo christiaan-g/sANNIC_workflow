@@ -151,7 +151,7 @@ a<-
   select(-value)%>%
   pivot_wider(names_from = Site,values_from = rank)
 
-# Produces a site-by-spcies presence-absence data frame
+# Produces a site-by-species presence-absence data frame
 b<-site_by_species_coarse%>%
   as.data.frame()%>%
   rownames_to_column("Site")%>%
