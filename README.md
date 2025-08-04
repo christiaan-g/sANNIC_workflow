@@ -20,9 +20,13 @@ Columns required for this workflow are:
 
 -   observed_on
 
+-   user_id
+
 -   quality_grade
 
 -   captive_cultivated
+
+-   longitude and latitude
 
 -   taxon_id
 
