@@ -197,6 +197,11 @@ e<-full_join(d1,d2)%>%
 view(e)
 
 
+## Prevalence index and urban summary output ###################################
+
+write_csv2(Urban_summary_table,"Output/Urban summary table.csv")
+write_csv2(e,"Output/Nonnative inventory prevalence index scores.csv")
+
 ## Completeness profile visuals ################################################
 
 # Produces Appendix C
@@ -234,7 +239,7 @@ completeness_coarse%>%
                                                "Yzterfontein" ,"Beaufort West")))%>%
   mutate(Assemblage = fct_recode(Assemblage,"a)  Cape Town" = "Cape Town" ,
                                  "b)  Paarl & Wellington" = "Paarl & Wellington",
-                                 "c)  Yzterfontein" = "Yzterfontein",
+                                 "c)  Yzerfontein" = "Yzterfontein",
                                  "d)  Beaufort West" = "Beaufort West"))%>%
   ggplot(aes(Order.q,Estimate.SC))+
   geom_line(colour = "black",linewidth = 0.4)+
