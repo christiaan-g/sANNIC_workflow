@@ -1,20 +1,25 @@
 ---
-title: "WC inventory analysis"
+title: "Urban Western Cape nonnative plant inventory analysis"
 author: "Christiaan Petrus Gildenhuys"
 date: "2025-08-08"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
-```{r setup}
+```{r echo = FALSE}
 rm(list = ls())
-
-knitr::opts_chunk$set(echo = FALSE)
-
+#knitr::opts_chunk$set(fig.width = 6, fig.height = 4)
+knitr::opts_chunk$set(
+	fig.height = 9,
+	fig.width = 14,
+	dpi = 300
+#	out.width = "80%"
+)
 ```
 
-## Load packages
 
-```{r echo = TRUE}
+```{r include=FALSE}
 library(tidyverse)
 library(rWCVPdata)
 
@@ -22,23 +27,16 @@ wcvp_distributions<-wcvp_distributions
 wcvp_names<-wcvp_names
 ```
 
-
-## Import records
-
-Here I import the records generated from the sANNIC (semi-Automated Non-Native Inventory Compilation) workflow
-
-```{r}
+```{r warning=FALSE, include=FALSE}
 setwd("~/sANNIC_workflow")
-#nonnative_records<-read_csv2("Output/Western Cape urban non-native records 1 February 2025.csv")
+nonnative_records<-read_csv2("Output/Western Cape urban non-native records 1 February 2025.csv")
 nonnative_inventory<-read_csv2("Output/Western Cape urban non-native plant inventory 1 February 2025.csv")
 PI_scores<-read_csv2("Output/Nonnative inventory prevalence index scores.csv")
 Special_cases<-read_csv2("Input/Problem_taxa.csv")
 head(nonnative_records)
 ```
 
-## Joining information from WCVP to the nonnative species inventory
-
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 nonnative_inventory2<-
 nonnative_inventory%>%
   left_join(wcvp_names%>%
@@ -48,59 +46,134 @@ nonnative_inventory%>%
               select(Species,PI,num_areas)%>%
               rename(taxon = Species))%>%
   filter(wcvp_rank != "Genus" | special_case == T)
-
-head(nonnative_inventory2)
 ```
-
 
 
 ## The most abundant families in the inventory
 
-```{r}
+```{r echo=FALSE}
 nonnative_inventory2%>%
   group_by(family)%>%
   summarise(obs = length(family))%>%
   mutate(family = fct_reorder(family,-obs))%>%
-  mutate(family = fct_other(family, keep = subset(as.character(.$family),obs>2)))%>%
+  mutate(family = fct_other(family, keep = subset(as.character(.$family),obs>6)))%>%
   ggplot(aes(family,obs))+
   geom_col(fill = "black")+
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 6))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 12))+
   ylab("Number of species")+
   xlab("Family")
 ```
 
+**Supplementary figure 1**: Most represented plant families by number of species in the Western Cape urban areas.
 
-```{r}
+
+
+
+
+```{r echo=FALSE}
 nonnative_inventory2%>%
   group_by(family)%>%
   summarise(sum_obs = sum(PI))%>%
   mutate(family = fct_reorder(family,-sum_obs))%>%
-  mutate(family = fct_other(family, keep = subset(as.character(.$family),sum_obs>1)))%>%
+  mutate(family = fct_other(family, keep = subset(as.character(.$family),sum_obs>3)))%>%
   ggplot(aes(family,sum_obs))+
   geom_col(fill = "black")+
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 6))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 12))+
   ylab("Species weighted by PI")+
   xlab("Family")
 ```
 
-```{r}
+**Supplementary figure 2**: Most represented plant families of species weighted by their prevalence index scores in the Western Cape urban areas.
+
+
+
+```{r echo=FALSE}
 nonnative_inventory2%>%
   group_by(family)%>%
   summarise(sum_obs = sum(num_obs))%>%
   mutate(family = fct_reorder(family,-sum_obs))%>%
-  mutate(family = fct_other(family, keep = subset(as.character(.$family),sum_obs>200)))%>%
+  mutate(family = fct_other(family, keep = subset(as.character(.$family),sum_obs>300)))%>%
   ggplot(aes(family,sum_obs))+
   geom_col(fill = "black")+
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 6))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 12))+
   ylab("Number of observations")+
   xlab("Family")
 ```
-## Load and prepare glonaf data for comparison
 
-```{r}
+**Supplementary figure 3**: Most represented plant families by number of total observations in the Western Cape urban areas.
+
+
+
+
+
+## Lifeform description
+```{r echo=FALSE}
+nonnative_inventory2%>%
+  group_by(lifeform_description)%>%
+  summarise(obs = length(taxon))%>%
+  group_by(lifeform_description)%>%
+  summarise(obs = sum(obs))%>%
+  group_by(lifeform_description)%>%
+  mutate(sum_obs = sum(obs))%>%
+  mutate(lifeform_description = fct_other(lifeform_description, 
+                                          keep = subset(as.character(.$lifeform_description),sum_obs>5)))%>%
+  ggplot(aes(reorder(lifeform_description,-sum_obs),obs))+
+  geom_col(fill = "black")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 14))+
+  ylab("Number of species")+
+  xlab("Life form description")
+
+```
+
+**Supplementary figure 4**: Most common life form descriptions of nonnative plant species in the Western Cape as reported in the WCVP.
+
+```{r echo=FALSE}
+nonnative_inventory2%>%
+  group_by(lifeform_description)%>%
+  summarise(obs = sum(num_obs))%>%
+  group_by(lifeform_description)%>%
+  summarise(obs = sum(obs))%>%
+  group_by(lifeform_description)%>%
+  mutate(sum_obs = sum(obs))%>%
+  mutate(lifeform_description = fct_other(lifeform_description, 
+                                          keep = subset(as.character(.$lifeform_description),sum_obs>500)))%>%
+  ggplot(aes(reorder(lifeform_description,-sum_obs),obs))+
+  geom_col(fill = "black")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 14))+
+  ylab("Number of observations")+
+  xlab("Life form description")
+
+```
+
+**Supplementary figure 5**: Most common life form descriptions by number of observations of nonnative plant species in the Western Cape urban areas.
+
+```{r echo=FALSE}
+nonnative_inventory2%>%
+  group_by(lifeform_description)%>%
+  summarise(obs = sum(PI))%>%
+  group_by(lifeform_description)%>%
+  summarise(obs = sum(obs))%>%
+  group_by(lifeform_description)%>%
+  mutate(sum_obs = sum(obs))%>%
+  mutate(lifeform_description = fct_other(lifeform_description, 
+                                          keep = subset(as.character(.$lifeform_description),sum_obs>5)))%>%
+  ggplot(aes(reorder(lifeform_description,-sum_obs),obs))+
+  geom_col(fill = "black")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 14))+
+  ylab("Species weighted by PI")+
+  xlab("Life form description")
+
+```
+
+**Supplementary figure 6**: Most common life form descriptions of of nonnative plant species weighted by prevalence index scores in the Western Cape urban areas.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
 glonaf_flora2<-
   read.csv2("C:/Users/chris/OneDrive - Stellenbosch University/Documents/Cotoneaster_review/GloNAF 2024/glonaf_flora2.csv")
@@ -110,7 +183,6 @@ glonaf_taxon<-
 
 glonaf_region<-
   read.csv2("C:/Users/chris/OneDrive - Stellenbosch University/Documents/Cotoneaster_review/GloNAF 2024/glonaf_region.csv")
-
 
 
 glonaf_nonnative_list_WC<-
@@ -133,7 +205,7 @@ glonaf_nonnative_list_WC<-
   select(taxon)%>%
   unique()%>%
   mutate(glonaf = 1)#%>%view()
-    
+
 glonaf_nonnative_list_SA<-
   left_join(glonaf_flora2,
             glonaf_taxon%>%
@@ -153,7 +225,7 @@ glonaf_nonnative_list_SA<-
                            .default = paste(Genus,species,sep = " ")))%>%
   select(taxon)%>%
   unique()%>%
-  mutate(glonaf = 1)%>%view()
+  mutate(glonaf = 1)#%>%view()
 
 glonaf_nonnative_list_global<-
   left_join(glonaf_flora2,
@@ -175,25 +247,11 @@ glonaf_nonnative_list_global<-
   unique()%>%
   mutate(glonaf = 1)#%>%view()
 
-?str_starts
 ```
 
 ## Compare the sANNIC-derived nonnative inventory to the GloNAF inventory for the Western Cape
-```{r}
 
-nonnative_inventory2%>%
-  select(taxon)%>%
-  mutate(taxon = str_remove_all(taxon,"\\× "))%>%
-  mutate(sANNIC = 1)%>%
-  full_join(glonaf_nonnative_list)%>%
-  mutate(across(everything(), ~replace_na(.,0)))%>%view()
-
-
-
-```
-
-
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 A<-nonnative_inventory2%>%
   select(taxon)%>%
   mutate(taxon = str_remove_all(taxon,"\\× "))%>%
@@ -211,11 +269,9 @@ D <- glonaf_nonnative_list_global%>%
   mutate(glonaf_global = 1)%>%
   mutate(across(everything(), ~replace_na(.,0)))
 
-
-
-full_join(A,B)%>%
-  full_join(C)%>%
-  full_join(D)%>%
+left_join(A,B)%>%
+  left_join(C)%>%
+  left_join(D)%>%
   mutate(across(everything(), ~replace_na(.,0)))%>%view()
 
 ```
@@ -223,35 +279,74 @@ full_join(A,B)%>%
 
 
 
-```{r}
+```{r echo=FALSE}
 
 library(eulerr)
 a <- A$taxon
 b <- B$taxon
 c <- C$taxon
 d <- D$taxon
+
+fit <- euler(list(`sANNIC workflow output` = a, 
+                  `GloNAF Western Cape` = b, 
+                  `GloNAF South Africa` = c, 
+                  `GloNAF Global`= d))
+plot(fit,quantities = list(size = 12),type = "percent",labels = F,legend = list(size = 12))
+```
+
+**Supplementary figure 7**: Proportional Euler diagram of the inventory generated using the sANNIC workflow to the known naturalised and/or invasive species recorded in GloNAF in the Western Cape, South Africa, and globally respectively.
+
+
+
+
+
+
+
+```{r eval=FALSE, include=FALSE}
+## Code graveyard
+
+# nonnative_inventory2%>%
+#   group_by(lifeform_description)%>%
+#   summarise(obs = length(taxon))%>%
+#   mutate(lifeform = gsub("[[:punct:]]", "", lifeform_description)) %>%
+#   separate_rows(lifeform, sep = " ")%>%
+#   filter(lifeform != "or")%>%
+#   group_by(lifeform,lifeform_description)%>%
+#   summarise(obs = sum(obs))%>%
+#   group_by(lifeform)%>%
+#   mutate(sum_obs = sum(obs))%>%
+#   mutate(lifeform = fct_reorder(lifeform,-sum_obs))%>%
+#   rename(`Lifeform description` = lifeform_description)%>%
+#   ggplot(aes(reorder(lifeform,-sum_obs),obs,fill = `Lifeform description`))+
+#   geom_col()+
+#   theme_bw()+
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1),
+#         legend.position = c(0.61,0.61))+
+#   ylab("Number of species")+
+#   xlab("Lifeform description")
+
+# nonnative_inventory2%>%
+#   group_by(lifeform_description)%>%
+#   summarise(obs = length(taxon))%>%view()
+#   mutate(lifeform = gsub("[[:punct:]]", "", lifeform_description)) %>%
+#   separate_rows(lifeform, sep = " ")%>%
+#   filter(lifeform != "or")%>%
+#   group_by(lifeform,lifeform_description)%>%
+#   summarise(obs = sum(obs))%>%
+#   group_by(lifeform)%>%
+#   mutate(sum_obs = sum(obs))%>%
+#   mutate(lifeform = fct_reorder(lifeform,-sum_obs))%>%
+#   rename(`Lifeform description` = lifeform_description)%>%
+#   ggplot(aes(reorder(lifeform,-sum_obs),obs))+
+#   geom_col()+
+#   theme_bw()+
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+#   ylab("Number of species")+
+#   xlab("Lifeform description")
 ```
 
 
 
-```{r}
-fit <- euler(list(A = a, B = b))
-plot(fit,quantities = T,type = "percent",labels = F,legend = T)
-
-```
-
-
-```{r}
-fit <- euler(list(A = a,C = c))
-plot(fit,quantities = T,type = "percent",labels = F,legend = T)
-
-```
-
-```{r}
-fit <- euler(list(A = a,D = d))
-plot(fit,quantities = T,type = "percent",labels = F,legend = T)
-
-```
 
 
 
