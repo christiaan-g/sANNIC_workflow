@@ -1,0 +1,257 @@
+---
+title: "WC inventory analysis"
+author: "Christiaan Petrus Gildenhuys"
+date: "2025-08-08"
+output: html_document
+---
+
+```{r setup}
+rm(list = ls())
+
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+## Load packages
+
+```{r echo = TRUE}
+library(tidyverse)
+library(rWCVPdata)
+
+wcvp_distributions<-wcvp_distributions
+wcvp_names<-wcvp_names
+```
+
+
+## Import records
+
+Here I import the records generated from the sANNIC (semi-Automated Non-Native Inventory Compilation) workflow
+
+```{r}
+setwd("~/sANNIC_workflow")
+#nonnative_records<-read_csv2("Output/Western Cape urban non-native records 1 February 2025.csv")
+nonnative_inventory<-read_csv2("Output/Western Cape urban non-native plant inventory 1 February 2025.csv")
+PI_scores<-read_csv2("Output/Nonnative inventory prevalence index scores.csv")
+Special_cases<-read_csv2("Input/Problem_taxa.csv")
+head(nonnative_records)
+```
+
+## Joining information from WCVP to the nonnative species inventory
+
+```{r}
+nonnative_inventory2<-
+nonnative_inventory%>%
+  left_join(wcvp_names%>%
+              select(plant_name_id,lifeform_description,climate_description,family)%>%
+              rename(wcvp_id_full = plant_name_id))%>%
+  left_join(PI_scores%>%
+              select(Species,PI,num_areas)%>%
+              rename(taxon = Species))%>%
+  filter(wcvp_rank != "Genus" | special_case == T)
+
+head(nonnative_inventory2)
+```
+
+
+
+## The most abundant families in the inventory
+
+```{r}
+nonnative_inventory2%>%
+  group_by(family)%>%
+  summarise(obs = length(family))%>%
+  mutate(family = fct_reorder(family,-obs))%>%
+  mutate(family = fct_other(family, keep = subset(as.character(.$family),obs>2)))%>%
+  ggplot(aes(family,obs))+
+  geom_col(fill = "black")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 6))+
+  ylab("Number of species")+
+  xlab("Family")
+```
+
+
+```{r}
+nonnative_inventory2%>%
+  group_by(family)%>%
+  summarise(sum_obs = sum(PI))%>%
+  mutate(family = fct_reorder(family,-sum_obs))%>%
+  mutate(family = fct_other(family, keep = subset(as.character(.$family),sum_obs>1)))%>%
+  ggplot(aes(family,sum_obs))+
+  geom_col(fill = "black")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 6))+
+  ylab("Species weighted by PI")+
+  xlab("Family")
+```
+
+```{r}
+nonnative_inventory2%>%
+  group_by(family)%>%
+  summarise(sum_obs = sum(num_obs))%>%
+  mutate(family = fct_reorder(family,-sum_obs))%>%
+  mutate(family = fct_other(family, keep = subset(as.character(.$family),sum_obs>200)))%>%
+  ggplot(aes(family,sum_obs))+
+  geom_col(fill = "black")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 6))+
+  ylab("Number of observations")+
+  xlab("Family")
+```
+## Load and prepare glonaf data for comparison
+
+```{r}
+
+glonaf_flora2<-
+  read.csv2("C:/Users/chris/OneDrive - Stellenbosch University/Documents/Cotoneaster_review/GloNAF 2024/glonaf_flora2.csv")
+
+glonaf_taxon<-
+  read.csv2("C:/Users/chris/OneDrive - Stellenbosch University/Documents/Cotoneaster_review/GloNAF 2024/glonaf_taxon_wcvp.csv")
+
+glonaf_region<-
+  read.csv2("C:/Users/chris/OneDrive - Stellenbosch University/Documents/Cotoneaster_review/GloNAF 2024/glonaf_region.csv")
+
+
+
+glonaf_nonnative_list_WC<-
+  left_join(glonaf_flora2,
+            glonaf_taxon%>%
+              rename(taxon_wcvp_id = id)%>%
+              select(taxon_wcvp_id,accepted_plant_name_id,taxa_accepted,taxon_orig,taxon_corrected))%>%
+  left_join(glonaf_region%>%
+              rename(region_id = id)%>%
+              select(code,name,region_id,tdwg4_id))%>%
+  filter(tdwg4_id == "CPP-WC")%>%
+  separate(taxa_accepted,sep = " ",
+           into = c("Genus","species"),
+           remove = F)%>%
+  mutate(taxon = case_when(Genus %in% Special_cases$Name ~ paste(Genus),
+                           Genus == "Oenothera" & species == "lindheimeri" ~ paste(Genus,species,sep = " "),
+                           Genus == "Oenothera" & species == "rosea" ~ paste(Genus,species,sep = " "),
+                           Genus == "Oenothera" ~ "sect Oenothera",
+                           .default = paste(Genus,species,sep = " ")))%>%
+  select(taxon)%>%
+  unique()%>%
+  mutate(glonaf = 1)#%>%view()
+    
+glonaf_nonnative_list_SA<-
+  left_join(glonaf_flora2,
+            glonaf_taxon%>%
+              rename(taxon_wcvp_id = id)%>%
+              select(taxon_wcvp_id,accepted_plant_name_id,taxa_accepted,taxon_orig,taxon_corrected))%>%
+  left_join(glonaf_region%>%
+              rename(region_id = id)%>%
+              select(code,name,region_id,tdwg4_id))%>%
+  filter(str_starts(code,"ZAF"))%>%
+  separate(taxa_accepted,sep = " ",
+           into = c("Genus","species"),
+           remove = F)%>%
+  mutate(taxon = case_when(Genus %in% Special_cases$Name ~ paste(Genus),
+                           Genus == "Oenothera" & species == "lindheimeri" ~ paste(Genus,species,sep = " "),
+                           Genus == "Oenothera" & species == "rosea" ~ paste(Genus,species,sep = " "),
+                           Genus == "Oenothera" ~ "sect Oenothera",
+                           .default = paste(Genus,species,sep = " ")))%>%
+  select(taxon)%>%
+  unique()%>%
+  mutate(glonaf = 1)%>%view()
+
+glonaf_nonnative_list_global<-
+  left_join(glonaf_flora2,
+            glonaf_taxon%>%
+              rename(taxon_wcvp_id = id)%>%
+              select(taxon_wcvp_id,accepted_plant_name_id,taxa_accepted,taxon_orig,taxon_corrected))%>%
+  left_join(glonaf_region%>%
+              rename(region_id = id)%>%
+              select(code,name,region_id,tdwg4_id))%>%
+  separate(taxa_accepted,sep = " ",
+           into = c("Genus","species"),
+           remove = F)%>%
+  mutate(taxon = case_when(Genus %in% Special_cases$Name ~ paste(Genus),
+                           Genus == "Oenothera" & species == "lindheimeri" ~ paste(Genus,species,sep = " "),
+                           Genus == "Oenothera" & species == "rosea" ~ paste(Genus,species,sep = " "),
+                           Genus == "Oenothera" ~ "sect Oenothera",
+                           .default = paste(Genus,species,sep = " ")))%>%
+  select(taxon)%>%
+  unique()%>%
+  mutate(glonaf = 1)#%>%view()
+
+?str_starts
+```
+
+## Compare the sANNIC-derived nonnative inventory to the GloNAF inventory for the Western Cape
+```{r}
+
+nonnative_inventory2%>%
+  select(taxon)%>%
+  mutate(taxon = str_remove_all(taxon,"\\× "))%>%
+  mutate(sANNIC = 1)%>%
+  full_join(glonaf_nonnative_list)%>%
+  mutate(across(everything(), ~replace_na(.,0)))%>%view()
+
+
+
+```
+
+
+```{r}
+A<-nonnative_inventory2%>%
+  select(taxon)%>%
+  mutate(taxon = str_remove_all(taxon,"\\× "))%>%
+  mutate(sANNIC = 1)
+
+B<-glonaf_nonnative_list_WC%>%
+  mutate(glonaf_WC = 1)%>%
+  mutate(across(everything(), ~replace_na(.,0)))
+
+C <- glonaf_nonnative_list_SA%>%
+  mutate(glonaf_SA = 1)%>%
+  mutate(across(everything(), ~replace_na(.,0)))
+
+D <- glonaf_nonnative_list_global%>%
+  mutate(glonaf_global = 1)%>%
+  mutate(across(everything(), ~replace_na(.,0)))
+
+
+
+full_join(A,B)%>%
+  full_join(C)%>%
+  full_join(D)%>%
+  mutate(across(everything(), ~replace_na(.,0)))%>%view()
+
+```
+
+
+
+
+```{r}
+
+library(eulerr)
+a <- A$taxon
+b <- B$taxon
+c <- C$taxon
+d <- D$taxon
+```
+
+
+
+```{r}
+fit <- euler(list(A = a, B = b))
+plot(fit,quantities = T,type = "percent",labels = F,legend = T)
+
+```
+
+
+```{r}
+fit <- euler(list(A = a,C = c))
+plot(fit,quantities = T,type = "percent",labels = F,legend = T)
+
+```
+
+```{r}
+fit <- euler(list(A = a,D = d))
+plot(fit,quantities = T,type = "percent",labels = F,legend = T)
+
+```
+
+
+
