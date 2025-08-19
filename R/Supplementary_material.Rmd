@@ -65,7 +65,7 @@ nonnative_inventory2%>%
   xlab("Family")
 ```
 
-**Supplementary figure 1**: Most represented plant families by number of species in the Western Cape urban areas.
+**Supplementary figure 1**: The best represented plant families of non-native plant species ordered by number of species in Western Cape urban areas.
 
 
 
@@ -85,7 +85,7 @@ nonnative_inventory2%>%
   xlab("Family")
 ```
 
-**Supplementary figure 2**: Most represented plant families of species weighted by their prevalence index scores in the Western Cape urban areas.
+**Supplementary figure 2**: The best represented plant families of non-native plant species  weighted by their prevalence index scores in Western Cape urban areas.
 
 
 
@@ -103,13 +103,13 @@ nonnative_inventory2%>%
   xlab("Family")
 ```
 
-**Supplementary figure 3**: Most represented plant families by number of total observations in the Western Cape urban areas.
+**Supplementary figure 3**: The best represented plant families of non-native species ordered by total number of observations in Western Cape urban areas.
 
 
 
 
 
-## Lifeform description
+## Life form distribution
 ```{r echo=FALSE}
 nonnative_inventory2%>%
   group_by(lifeform_description)%>%
@@ -129,7 +129,7 @@ nonnative_inventory2%>%
 
 ```
 
-**Supplementary figure 4**: Most common life form descriptions of nonnative plant species in the Western Cape as reported in the WCVP.
+**Supplementary figure 4**: Most common life forms among non-native plant species in the Western Cape as reported in the World Checklist of Vascular Plants.
 
 ```{r echo=FALSE}
 nonnative_inventory2%>%
@@ -150,7 +150,7 @@ nonnative_inventory2%>%
 
 ```
 
-**Supplementary figure 5**: Most common life form descriptions by number of observations of nonnative plant species in the Western Cape urban areas.
+**Supplementary figure 5**: Most common life forms of non-native plant species in the Western Cape urban areas, ordered by the number of observations.
 
 ```{r echo=FALSE}
 nonnative_inventory2%>%
@@ -171,7 +171,7 @@ nonnative_inventory2%>%
 
 ```
 
-**Supplementary figure 6**: Most common life form descriptions of of nonnative plant species weighted by prevalence index scores in the Western Cape urban areas.
+**Supplementary figure 6**: Most common life forms of non-native plant species in Western Cape urban areas weighted by prevalence index scores.
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
@@ -249,7 +249,7 @@ glonaf_nonnative_list_global<-
 
 ```
 
-## Compare the sANNIC-derived nonnative inventory to the GloNAF inventory for the Western Cape
+## Comparing the sANNIC-derived nonnative inventory to the GloNAF inventory for the Western Cape
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 A<-nonnative_inventory2%>%
@@ -294,7 +294,7 @@ fit <- euler(list(`sANNIC workflow output` = a,
 plot(fit,quantities = list(size = 12),type = "percent",labels = F,legend = list(size = 12))
 ```
 
-**Supplementary figure 7**: Proportional Euler diagram of the inventory generated using the sANNIC workflow to the known naturalised and/or invasive species recorded in GloNAF in the Western Cape, South Africa, and globally respectively.
+**Supplementary figure 7**: Proportional Euler diagram of the inventory generated using the sANNIC workflow compared with the known naturalised and/or invasive species recorded in GloNAF for the Western Cape province, South Africa, and globally.
 
 
 
